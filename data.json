@@ -1,0 +1,22 @@
+{
+  "quickcopy_root_id": "2729c71f-84a6-4a62-afbc-5e8c198c06d5",
+  "favorites_root_id": "324e730a-8f4b-4b3a-811f-0de057fafc5e",
+  "nodes": {
+    "324e730a-8f4b-4b3a-811f-0de057fafc5e": {
+      "id": "324e730a-8f4b-4b3a-811f-0de057fafc5e",
+      "type": "folder",
+      "name": "Favorites",
+      "children": [],
+      "content": null,
+      "target_id": null
+    },
+    "2729c71f-84a6-4a62-afbc-5e8c198c06d5": {
+      "id": "2729c71f-84a6-4a62-afbc-5e8c198c06d5",
+      "type": "folder",
+      "name": "QuickCopy",
+      "children": [],
+      "content": null,
+      "target_id": null
+    }
+  }
+}
