@@ -83,7 +83,7 @@ If you regularly explain the same information in meetings, this tool helps you s
 
 ## 🚀 Key Features
 
-- Rich text formatting (bold, underline, color, font size)
+- bold, underline, color, font size
 - Organized folder structure
 - Copy sections with one click
 - Auto-save option
