@@ -1,4 +1,17 @@
 # -*- coding: utf-8 -*-
+import sys
+import ctypes
+
+# ---- Fix blurry text on high-DPI Windows laptops ----
+if sys.platform.startswith("win"):
+    try:
+        ctypes.windll.shcore.SetProcessDpiAwareness(1)  # Per-monitor DPI aware (older Windows)
+    except Exception:
+        try:
+            ctypes.windll.user32.SetProcessDPIAware()  # System DPI aware fallback
+        except Exception:
+            pass
+
 import tkinter as tk
 from tkinter import ttk, messagebox
 
@@ -12,7 +25,11 @@ class App(tk.Tk):
         super().__init__()
         self.title("Notary QuickCopy")
         self.geometry("1200x750")
-        self.minsize(1000, 650)
+
+        # ---- Allow the window to shrink smaller ----
+        # Your old minsize (1000x650) forced it huge on laptops.
+        # Set this smaller so you can resize freely while still keeping UI usable.
+        self.minsize(520, 420)
 
         self.storage = Storage("data.json")
         self.db = self.storage.load_or_create_blank()
@@ -64,15 +81,13 @@ class App(tk.Tk):
         try:
             self.storage.save(self.db)
         except Exception as e:
-            messagebox.showerror("Save error", f"Could not save data.json:\n\n{e}")
+            messagebox.showerror("Save error", f"Could not save data:\n\n{e}")
 
     def show_explorer(self):
-        # Keep app header stable (FileView will handle in-screen titles)
         self.explorer.refresh_all()
         self.explorer.tkraise()
 
     def open_file(self, file_id: str, return_state: dict | None = None):
-        # Keep app header stable (FileView will handle in-screen titles)
         self.file_view.open_file(file_id=file_id, return_state=return_state)
         self.file_view.tkraise()
 
@@ -89,21 +104,14 @@ class App(tk.Tk):
 
     # ---- Global mousewheel scrolling (works anywhere scrollable) ----
     def _install_global_mousewheel(self):
-        # Windows / macOS
         self.bind_all("<MouseWheel>", self._on_global_mousewheel, add="+")
         self.bind_all("<Shift-MouseWheel>", self._on_global_shift_mousewheel, add="+")
-        # Linux
         self.bind_all("<Button-4>", self._on_global_linux_wheel_up, add="+")
         self.bind_all("<Button-5>", self._on_global_linux_wheel_down, add="+")
 
     def _find_scroll_target(self, widget):
-        """
-        Walk up the widget hierarchy looking for something scrollable.
-        Supports: Text, Canvas, Treeview, Listbox, and anything with yview().
-        """
         w = widget
         while w is not None:
-            # Prefer widgets that expose yview (Text/Canvas/Treeview/Listbox/etc.)
             if hasattr(w, "yview") and callable(getattr(w, "yview")):
                 return w
             w = w.master
@@ -126,22 +134,13 @@ class App(tk.Tk):
         target = self._find_scroll_target(self.winfo_containing(event.x_root, event.y_root))
         if not target:
             return
-
-        # Windows: event.delta is multiples of 120
-        if event.delta > 0:
-            self._scroll_widget(target, -3)
-        else:
-            self._scroll_widget(target, 3)
+        self._scroll_widget(target, -3 if event.delta > 0 else 3)
 
     def _on_global_shift_mousewheel(self, event):
         target = self._find_scroll_target(self.winfo_containing(event.x_root, event.y_root))
         if not target:
             return
-
-        if event.delta > 0:
-            self._scroll_widget_x(target, -3)
-        else:
-            self._scroll_widget_x(target, 3)
+        self._scroll_widget_x(target, -3 if event.delta > 0 else 3)
 
     def _on_global_linux_wheel_up(self, event):
         target = self._find_scroll_target(self.winfo_containing(event.x_root, event.y_root))
